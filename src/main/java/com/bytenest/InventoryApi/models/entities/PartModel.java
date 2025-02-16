@@ -2,6 +2,7 @@ package com.bytenest.InventoryApi.models.entities;
 
 import jakarta.persistence.*;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.hateoas.RepresentationModel;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -11,7 +12,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "TB_PARTS")
-public class PartModel implements Serializable {
+public class PartModel extends RepresentationModel<PartModel> implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -30,6 +31,9 @@ public class PartModel implements Serializable {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate entryDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate maximumReturnDate;
 
     private String supplier;
 
@@ -93,6 +97,7 @@ public class PartModel implements Serializable {
 
     public PartModel setEntryDate(String entryDate) {
         this.entryDate = getParseDate(entryDate);
+        this.maximumReturnDate = getEntryDate().plusDays(10);
         return this;
     }
 
@@ -108,4 +113,9 @@ public class PartModel implements Serializable {
         this.supplier = supplier;
         return this;
     }
+
+    public LocalDate getMaximumReturnDate() {
+        return maximumReturnDate;
+    }
+
 }

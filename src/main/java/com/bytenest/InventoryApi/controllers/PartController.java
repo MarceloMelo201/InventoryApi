@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class PartController {
@@ -23,22 +25,37 @@ public class PartController {
 
 
     @PostMapping("/parts")
-    public ResponseEntity<PartModel> saveProduct(@RequestBody @Valid PartRecordDto partRecordDto){
-        var partModel = new PartModel();
-        BeanUtils.copyProperties(partRecordDto, partModel);
-        return ResponseEntity.status(HttpStatus.CREATED).body(partRepository.save(partModel));
+    public ResponseEntity<?> saveProduct(@RequestBody @Valid PartRecordDto partRecordDto) {
+        try {
+            var partModel = new PartModel();
+            BeanUtils.copyProperties(partRecordDto, partModel);
+            return ResponseEntity.status(HttpStatus.CREATED).body(partRepository.save(partModel));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro ao salvar a peça: " + e.getMessage());
+        }
     }
+
 
 
     @GetMapping("/parts")
     public ResponseEntity<List<PartModel>> getAllParts(){
-        return ResponseEntity.status(HttpStatus.OK).body(partRepository.findAll());
+        List<PartModel> partsList = partRepository.findAll();
+        if(!partsList.isEmpty()){
+            for(PartModel p: partsList){
+                UUID id = p.getIdPart();
+                p.add(linkTo(methodOn(PartController.class).getOnePart(id)).withSelfRel());
+            }
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(partsList);
     }
 
 
     @GetMapping("/parts/{id}")
     public ResponseEntity<Object> getOnePart(@PathVariable(value = "id")UUID id){
         Optional<PartModel> part0 = partRepository.findById(id);
+
+        part0.get().add(linkTo(methodOn(PartController.class).getAllParts()).withRel("Parts list"));
         return part0.<ResponseEntity<Object>>
                 map(partModel -> ResponseEntity.status(HttpStatus.OK).body(partModel))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Part not found"));
