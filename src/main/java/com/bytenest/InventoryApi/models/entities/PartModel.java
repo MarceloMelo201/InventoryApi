@@ -28,12 +28,8 @@ public class PartModel extends RepresentationModel<PartModel> implements Seriali
     private String description;
     private Integer quantity;
 
-
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate entryDate;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate maximumReturnDate;
 
     private String supplier;
 
@@ -97,7 +93,6 @@ public class PartModel extends RepresentationModel<PartModel> implements Seriali
 
     public PartModel setEntryDate(String entryDate) {
         this.entryDate = getParseDate(entryDate);
-        this.maximumReturnDate = getEntryDate().plusDays(10);
         return this;
     }
 
@@ -112,10 +107,6 @@ public class PartModel extends RepresentationModel<PartModel> implements Seriali
     public PartModel setSupplier(String supplier) {
         this.supplier = supplier;
         return this;
-    }
-
-    public LocalDate getMaximumReturnDate() {
-        return maximumReturnDate;
     }
 
 }
